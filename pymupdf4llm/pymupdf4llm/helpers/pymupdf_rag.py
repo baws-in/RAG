@@ -33,6 +33,7 @@ import pymupdf
 from pymupdf4llm.helpers.get_text_lines import get_raw_lines, is_white
 from pymupdf4llm.helpers.multi_column import column_boxes
 from pymupdf4llm.helpers.progress import ProgressBar
+from pymupdf4llm.helpers.legacyfont2unicode import legacy2unicode, font_set
 
 bullet = tuple(
     [
@@ -336,7 +337,7 @@ def to_markdown(
             middle = (hot.tl + hot.br) / 2  # middle point of hot area
             if not middle in bbox:
                 continue  # does not touch the bbox
-            text = f'[{span["text"].strip()}]({link["uri"]})'
+            text = f'[{legacy2unicode(span["text"], span["font"]).strip()}]({link["uri"]})'
             return text
 
     def save_image(page, rect, i):
@@ -485,7 +486,7 @@ def to_markdown(
                         out_string += img_txt
                 del img_rects[i]
 
-            text = " ".join([s["text"] for s in spans])
+            text = " ".join([legacy2unicode(s["text"], s["font"]) for s in spans])
 
             # full line mono-spaced?
             if not IGNORE_CODE:
@@ -547,7 +548,7 @@ def to_markdown(
 
                 if mono:
                     # this is text in some monospaced font
-                    out_string += f"`{s['text'].strip()}` "
+                    out_string += f"`{legacy2unicode(s["text"], s["font"]).strip()}` "
                 else:  # not a mono text
                     prefix = ""
                     suffix = ""
@@ -564,7 +565,7 @@ def to_markdown(
                     if ltext:
                         text = f"{hdr_string}{prefix}{ltext}{suffix} "
                     else:
-                        text = f"{hdr_string}{prefix}{s['text'].strip()}{suffix} "
+                        text = f"{hdr_string}{prefix}{legacy2unicode(s["text"], s["font"]).strip()}{suffix} "
 
                     if text.startswith(bullet):
                         text = "-  " + text[1:]
@@ -926,6 +927,7 @@ def to_markdown(
                 }
             )
 
+    print(font_set)
     return document_output
 
 
