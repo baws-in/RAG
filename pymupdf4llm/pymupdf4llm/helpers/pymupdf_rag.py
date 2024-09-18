@@ -545,10 +545,10 @@ def to_markdown(
                 mono = s["flags"] & 8 and IGNORE_CODE is False
                 bold = s["flags"] & 16
                 italic = s["flags"] & 2
-
+                correct_str = legacy2unicode(s["text"], s["font"]).strip()
                 if mono:
                     # this is text in some monospaced font
-                    out_string += f"`{legacy2unicode(s["text"], s["font"]).strip()}` "
+                    out_string += f"`{correct_str}`"
                 else:  # not a mono text
                     prefix = ""
                     suffix = ""
@@ -565,7 +565,7 @@ def to_markdown(
                     if ltext:
                         text = f"{hdr_string}{prefix}{ltext}{suffix} "
                     else:
-                        text = f"{hdr_string}{prefix}{legacy2unicode(s["text"], s["font"]).strip()}{suffix} "
+                        text = f"{hdr_string}{prefix}{correct_str}{suffix} "
 
                     if text.startswith(bullet):
                         text = "-  " + text[1:]
