@@ -509,7 +509,7 @@ def to_markdown(
             span0 = spans[0]
             bno = span0["block"]  # block number of line
             if bno != prev_bno:
-                out_string += "\n"
+                #out_string += "\n"
                 prev_bno = bno
 
             if (  # check if we need another line break

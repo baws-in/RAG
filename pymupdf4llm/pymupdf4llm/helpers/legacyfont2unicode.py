@@ -236,7 +236,7 @@ def chanakya905_to_unicode(input_str):
 
     def chanakya905_replace_symbols(modified_substring, array_one, array_one_length):
             if modified_substring:
-                modified_substring = modified_substring.replace(r'([ZzsSqwa¡`]+)Q', r'Q\1')
+                modified_substring = re.sub(r'([ZzsSqwa¡`]+)Q', r'Q\1', modified_substring)
 
                 for input_symbol_idx in range(0, array_one_length - 1, 2):
                     idx = 0
@@ -292,16 +292,17 @@ def chanakya905_to_unicode(input_str):
     return processed_text
 
     
-
+#result = chanakya905_to_unicode("osQ fy, gj le; vius dÙkZO; dk ikyu djsxkA")
 
 def legacy2unicode(str, font):
     font_set.add(font)
-    
     if re.search("kruti", font, re.IGNORECASE):
         return kruti2unicode(str)
     elif re.search("chanakya901", font, re.IGNORECASE):
         return chanakya901_to_unicode(str)
     elif re.search("chanakya905", font, re.IGNORECASE):
+        return chanakya905_to_unicode(str)
+    elif re.search("chanakya902", font, re.IGNORECASE):
         return chanakya905_to_unicode(str)
     else:
         return str
