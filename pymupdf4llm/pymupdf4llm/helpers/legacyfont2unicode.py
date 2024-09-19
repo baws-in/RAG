@@ -212,12 +212,12 @@ def chanakya905_to_unicode(input_str):
                      "त", "Rk", "त", "R", "त्", "Fk", "थ", "F", "थ्", 
                      "n", "द", "/", "ध", "èk", "ध", "è", "ध्", "Ë", "ध्", 
                      "u", "न", "Uk", "न", "U", "न्", "iQ", "फ", "i", "प", 
-                     "Ik", "प", "I", "प्", "¶", "फ्", "c", "ब", "Ck", "ब", 
+                     "Ik", "प", "I", "प्", "\"", "ष्", "¶", "\"", "c", "ब", "Ck", "ब", 
                      "C", "ब्", "Hk", "भ", "H", "भ्", "e", "म", "Ek", "म", 
-                     "E", "म्", ";", "य", "¸", "य्", "j", "र", "y", "ल", "Yk", 
+                     "E", "म्", ";", "य", "¸", "\"", "j", "र", "y", "ल", "Yk", 
                      "ल", "Y", "ल्", "G", "ळ", "oQ", "क", "o", "व", "Ok", "व", 
                      "O", "व्", "'k", "श", "'", "श्", "Ük", "श", "Ü", "श्", "\"k", 
-                     "ष", "\"", "ष्", "l", "स", "Lk", "स", "L", "स्", "g", "ह", 
+                     "ष", "l", "स", "Lk", "स", "L", "स्", "g", "ह", 
                      "È", "ीं", "z", "्र", "Ì", "द्द", "Í", "ट्ट", "Î", "ट्ठ", "Ï", 
                      "ड्ड", "Ñ", "कृ", "Ò", "भ", "Ó", "्य", "Ô", "ड्ढ", "Ö", 
                      "झ्", "Ø", "क्र", "Ù", "त्त्", "¼", "द्ध", "Ú", "फ्र", "É", 
@@ -241,6 +241,9 @@ def chanakya905_to_unicode(input_str):
                 for input_symbol_idx in range(0, array_one_length - 1, 2):
                     idx = 0
                     while idx != -1:
+                        #idx = modified_substring.find(array_one[input_symbol_idx])
+                        #if idx != -1:
+                        #    print(array_one[input_symbol_idx], array_one[input_symbol_idx + 1])
                         modified_substring = modified_substring.replace(array_one[input_symbol_idx], array_one[input_symbol_idx + 1])
                         idx = modified_substring.find(array_one[input_symbol_idx])
             
@@ -292,7 +295,7 @@ def chanakya905_to_unicode(input_str):
     return processed_text
 
     
-#result = chanakya905_to_unicode("osQ fy, gj le; vius dÙkZO; dk ikyu djsxkA")
+#result = chanakya905_to_unicode("¶jktk u firk] u xq#] u fe=k] u ekrk] u iRuh] u iq=k] u ?kjsyw iqtkjh dks fcuk ltk osQ NksM+sxk] ;fn os vius dÙkZO;ksa dk fuokZg Bhd&Bhd ugha djrsA¸")
 
 def legacy2unicode(str, font):
     font_set.add(font)

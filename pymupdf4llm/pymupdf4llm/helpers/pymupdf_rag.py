@@ -106,7 +106,7 @@ class IdentifyHeaders:
             reverse=True,
         )
         if temp:
-            self.body_limit = min(body_limit, temp[0][0])
+            self.body_limit = temp[0][0]
         else:
             self.body_limit = body_limit
 
@@ -514,7 +514,7 @@ def to_markdown(
 
             if (  # check if we need another line break
                 prev_lrect
-                and lrect.y1 - prev_lrect.y1 > lrect.height * 1.5
+                and lrect.y1 - prev_lrect.y1 > min(lrect.height, prev_lrect.height) * 1.5
                 or span0["text"].startswith("[")
                 or span0["text"].startswith(bullet)
                 or span0["flags"] & 1  # superscript?
