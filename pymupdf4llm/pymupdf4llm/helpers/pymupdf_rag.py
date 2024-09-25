@@ -27,6 +27,7 @@ License GNU Affero GPL 3.0
 """
 
 import os
+import re
 import string
 from binascii import b2a_base64
 import pymupdf
@@ -280,6 +281,7 @@ def to_markdown(
 
     GRAPHICS_LIMIT = graphics_limit
     FONTSIZE_LIMIT = fontsize_limit
+    font_set.clear()
 
     if not isinstance(doc, pymupdf.Document):
         doc = pymupdf.open(doc)
@@ -371,7 +373,22 @@ def to_markdown(
             data = f"data:image/{IMG_EXTENSION};base64," + data
             return data
         return ""
-
+    
+    def starts_with_numeric_and_bullet(input_string):
+        # Define a regex pattern to check for a numeric character at the start
+        numeric_pattern = r'^\d+'
+        
+        # Check if the string starts with a numeric character
+        if re.match(numeric_pattern, input_string):
+            # Remove the numeric character from the start for further matching
+            remaining_string = input_string[1:]
+            
+            # Check if the remaining string starts with any of the strings in the tuple
+            if remaining_string.startswith(bullet):
+                return True
+    
+        return False
+    
     def write_text(
         page: pymupdf.Page,
         textpage: pymupdf.TextPage,
@@ -418,6 +435,15 @@ def to_markdown(
         prev_bno = -1  # previous block number of line
         code = False  # mode indicator: outputting code
         prev_hdr_string = None
+        sum_gap_ratio = 0
+        avg_gap_ratio = 0
+        for lrect, spans in nlines:
+            if prev_lrect:
+                sum_gap_ratio += min(1.7,(lrect.y1 - prev_lrect.y1) / prev_lrect.height)
+            prev_lrect = lrect    
+
+        if len(nlines) > 3: 
+            avg_gap_ratio = sum_gap_ratio / (len(nlines)-1)
 
         for lrect, spans in nlines:
             # there may be tables or images inside the text block: skip them
@@ -511,13 +537,16 @@ def to_markdown(
             if bno != prev_bno:
                 #out_string += "\n"
                 prev_bno = bno
-
+            
+            gap_to_use = avg_gap_ratio*lrect.height*1.02 if avg_gap_ratio > 0 else lrect.height* 1.5
+            
             if (  # check if we need another line break
-                prev_lrect
-                and lrect.y1 - prev_lrect.y1 > min(lrect.height, prev_lrect.height) * 1.5
+                prev_lrect 
+                and lrect.y1 - prev_lrect.y1 > gap_to_use
                 or span0["text"].startswith("[")
                 or span0["text"].startswith(bullet)
                 or span0["flags"] & 1  # superscript?
+                or starts_with_numeric_and_bullet(span0["text"])
             ):
                 out_string += "\n"
             prev_lrect = lrect

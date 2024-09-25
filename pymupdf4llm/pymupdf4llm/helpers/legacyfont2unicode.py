@@ -29,7 +29,7 @@ def chanakya901_to_unicode(str_input):
         "Ì", "द्द", "í", "द्द", "Ľ", "द्ध", "¼", "द्ध", "˜", "द्भ", "ö", "द्भ",
         "|", "द्य", "}", "द्व", "é", "न्न", "™", "न्न्", "ó", "स्त्र", "â", "हृ",
         "à", "ह्न", "ã", "ह्म", "á", "ह्य", "º", "ह्", "J", "श्र", "Ø", "क्र",
-        "Ř", "क्र", "Ý", "फ्र", "æ", "द्र", "ç", "प्र", "Á", "प्र", "प्रQ", "फ्र",
+        "Ř", "क्र", "Ý", "फ्", "æ", "द्र", "ç", "प्र", "Á", "प्र", "प्रQ", "फ्र",
         "व्रQ", "क्र", "#", "रु", ":", "रू", "Ó", "्य", "î", "्य", "z", "्र",
         "ª", "्र", "Ş", "्र", "È", "ीं", "Ê", "Zी", "›", "Zैं", "õ", "Zैं",
         "±", "Zं", "Æ", "र्f", "É", "र्Ż", "्k", "", "‚", "ॉ", "¨", "ो",
@@ -47,6 +47,9 @@ def chanakya901_to_unicode(str_input):
     
     def replace_symbols(modified_substring):
         if modified_substring:
+            modified_substring = re.sub(r'é', r'Â', modified_substring)
+            modified_substring = re.sub(r'ÝQ', r'iQ', modified_substring)
+            modified_substring = re.sub(r'Õk', r';', modified_substring)
             modified_substring = re.sub(r'([ ])([kzsSqwWa¡`±ZQ\+‚¨®sS©h¢ˇ%•∙·~ÈÊ\›õ])', r'\2', modified_substring)
             modified_substring = re.sub(r'([ZzsSqwa¡`]+)Q', r'Q\1', modified_substring)
             modified_substring = re.sub(r'([ZzsSqwa¡`]+)\+', r'+\1', modified_substring)
@@ -195,7 +198,7 @@ def chanakya905_to_unicode(input_str):
                      "छ्य", "Vî", "ट्य", "Bî", "ठ्य", "Mî", "ड्य", "<î", 
                      "ढ्य", "|", "द्य", "K", "ज्ञ", "}", "द्व", "J", "श्र", 
                      "Vª", "ट्र", "Mª", "ड्र", ">ª", "ढ्र", "Nª", "छ्र", 
-                     "Ø", "क्र", "Ý", "फ्र", "nzZ", "र्द्र", "æ", "द्र", "ç", 
+                     "Ø", "क्र", "Ý", "फ्", "nzZ", "र्द्र", "æ", "द्र", "ç", 
                      "प्र", "Á", "प्र", "xz", "ग्र", "#", "रु", ":", "रू", 
                      "v‚", "ऑ", "vks", "ओ", "vkS", "औ", "vk", "आ", 
                      "v", "अ", "b±", "ईं", "Ã", "ई", "bZ", "ई", "b", 
@@ -228,7 +231,7 @@ def chanakya905_to_unicode(input_str):
                      "S", "ै", "a", "ं", "¡", "ँ", "ˇ", "ँ", "%", "ः", "W", 
                      "ॅ", "•", "ऽ", "·", "ऽ", "∙", "ऽ", "·", "ऽ", "+", "़", 
                      "\\", "?", "‘", "\"", "’", "\"", "“", "'", "^", "‘", 
-                     "*", "’", "Þ", "“", "ß", "”", "¾", "=", "&", "-", "μ", 
+                     "*", "’", "Þ", "“", "ß", "ह्र", "¾", "=", "&", "-", "μ", 
                      "-", "¿", "{", "À", "}", "A", "।", "Œ", "॰", "]", ",", 
                      "@", "/", "ः", ":", "~", "्", "्ा", "", "ाे", "ो", "ाॅ", 
                      "ॉ", "अौ", "औ", "अो", "ओ", "आॅ", "ऑ"]
@@ -236,6 +239,9 @@ def chanakya905_to_unicode(input_str):
 
     def chanakya905_replace_symbols(modified_substring, array_one, array_one_length):
             if modified_substring:
+                modified_substring = re.sub(r'é', r'Â', modified_substring)
+                modified_substring = re.sub(r'ÝQ', r'iQ', modified_substring)
+                modified_substring = re.sub(r'Õk', r';', modified_substring)
                 modified_substring = re.sub(r'([ZzsSqwa¡`]+)Q', r'Q\1', modified_substring)
 
                 for input_symbol_idx in range(0, array_one_length - 1, 2):
@@ -295,7 +301,7 @@ def chanakya905_to_unicode(input_str):
     return processed_text
 
     
-#result = chanakya905_to_unicode("¶jktk u firk] u xq#] u fe=k] u ekrk] u iRuh] u iq=k] u ?kjsyw iqtkjh dks fcuk ltk osQ NksM+sxk] ;fn os vius dÙkZO;ksa dk fuokZg Bhd&Bhd ugha djrsA¸")
+result = chanakya905_to_unicode("""vlÝQy""")
 
 def legacy2unicode(str, font):
     font_set.add(font)

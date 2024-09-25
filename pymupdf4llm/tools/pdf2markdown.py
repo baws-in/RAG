@@ -34,9 +34,9 @@ def store_text_values(array_of_dicts, filename_prefix):
             filename = f"{filename_prefix}\\{idx + 1}.md"
             pathlib.Path(filename).write_bytes(text_value)
 
-for filepath, file in file_iterator(sys.argv[1], pattern = "Volume_25*.pdf"):
-    md_text = pymupdf4llm.to_markdown(filepath, margins=(0,0,0,0), page_chunks=True)
-    store_text_values(md_text,  os.path.splitext(filepath)[0])
+for filepath, file in file_iterator(sys.argv[1], pattern = "Volume_40*.pdf"):
+    md_text = pymupdf4llm.to_markdown(filepath, margins=(0,0,0,0), page_chunks=True, pages=[275])
+    store_text_values(md_text,  (os.path.splitext(filepath)[0]))
 
 #import pathlib
 #pathlib.Path(sys.argv[2]).write_bytes(md_text.encode())
