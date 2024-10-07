@@ -55,6 +55,16 @@ def get_raw_lines(textpage, clip=None, tolerance=3):
     """
     y_delta = tolerance  # allowable vertical coordinate deviation
 
+    import functools
+    def sort_with_tolerance(items, tolerance_percentage=2):
+        def compare_with_tolerance(a, b):
+            tolerance = max(a["bbox"].y1, b["bbox"].y1) * (tolerance_percentage / 100)
+            if abs(a["bbox"].y1 - b["bbox"].y1) <= tolerance:
+                return 0  # Consider them equal
+            return -1 if a["bbox"].y1 < b["bbox"].y1 else 1
+
+        return sorted(items, key=functools.cmp_to_key(compare_with_tolerance))
+
     def sanitize_spans(line):
         """Sort and join the spans in a re-synthesized line.
 
@@ -76,8 +86,12 @@ def get_raw_lines(textpage, clip=None, tolerance=3):
             # "delta" depends on the font size. Spans  will be joined if
             # no more than 10% of the font size separates them.
             delta = s1["size"] * 0.1
-            if s0["bbox"].x1 + delta < s1["bbox"].x0:
-                continue  # all good: no joining neded
+            if ( s0["bbox"].x1 + delta < s1["bbox"].x0 or
+               s0["font"] != s1["font"] or
+               s0["size"] != s1["size"] or
+               s0["color"] != s1["color"] ):
+               
+               continue  # all good: no joining neded
 
             # We need to join bbox and text of two consecutive spans
             # On occasion, spans may also be duplicated.
@@ -99,7 +113,7 @@ def get_raw_lines(textpage, clip=None, tolerance=3):
     spans = []  # all spans in TextPage here
     for bno, b in enumerate(blocks):  # the numbered blocks
         for lno, line in enumerate(b["lines"]):  # the numbered lines
-            if abs(1 - line["dir"][0]) > 1e-3:  # only accept horizontal text
+            if abs(1 - line["dir"][0]) > 1e-2:  # only accept horizontal text
                 continue
             for sno, s in enumerate(line["spans"]):  # the numered spans
                 sbbox = pymupdf.Rect(s["bbox"])  # span bbox as a Rect
@@ -123,7 +137,10 @@ def get_raw_lines(textpage, clip=None, tolerance=3):
     if not spans:  # no text at all
         return []
 
-    spans.sort(key=lambda s: s["bbox"].y1)  # sort spans by bottom coord
+    #spans.sort(key=lambda s: s["bbox"].y1)  # sort spans by bottom coord
+
+    spans = sort_with_tolerance(spans)
+
     nlines = []  # final result
     line = [spans[0]]  # collects spans with fitting vertical coordinates
     lrect = spans[0]["bbox"]  # rectangle joined from span rectangles

@@ -129,7 +129,7 @@ class IdentifyHeaders:
         """
         fontsize = round(span["size"])  # compute fontsize
         hdr_id = self.header_id.get(fontsize, "")
-        if not hdr_id and fontsize > self.body_limit:
+        if not hdr_id and fontsize > self.body_limit*1.25:
             hdr_id = "###### "
         return hdr_id
 
@@ -214,6 +214,12 @@ def is_significant(box, paths):
             return True
     return False
 
+def escape_markdown(text):
+    """Escapes Markdown special characters in a string."""
+
+    escape_chars =r'([\`\*\_\{\}\[\]\(\)\#\+\-\\!\>\|])'
+                  
+    return re.sub(escape_chars, r"\\\1", text)
 
 def to_markdown(
     doc,
@@ -376,16 +382,11 @@ def to_markdown(
     
     def starts_with_numeric_and_bullet(input_string):
         # Define a regex pattern to check for a numeric character at the start
-        numeric_pattern = r'^\d+'
+        numeric_pattern = r'^\s*\\\(?\d'
         
         # Check if the string starts with a numeric character
         if re.match(numeric_pattern, input_string):
-            # Remove the numeric character from the start for further matching
-            remaining_string = input_string[1:]
-            
-            # Check if the remaining string starts with any of the strings in the tuple
-            if remaining_string.startswith(bullet):
-                return True
+            return True
     
         return False
     
@@ -421,7 +422,7 @@ def to_markdown(
         out_string = ""
 
         # This is a list of tuples (linerect, spanlist)
-        nlines = get_raw_lines(textpage, clip=clip, tolerance=3)
+        nlines = get_raw_lines(textpage, clip=clip, tolerance=10)
 
         line_rects.extend([l[0] for l in nlines])  # store line rectangles
 
@@ -437,10 +438,20 @@ def to_markdown(
         prev_hdr_string = None
         sum_gap_ratio = 0
         avg_gap_ratio = 0
+        left_boundary = 0
+        right_boundary = 0
+        rect_lefts = []
+        rect_rights = []
         for lrect, spans in nlines:
+            rect_lefts.append(lrect.x0)
+            rect_rights.append(lrect.x1)
             if prev_lrect:
                 sum_gap_ratio += min(1.7,(lrect.y1 - prev_lrect.y1) / prev_lrect.height)
             prev_lrect = lrect    
+        rect_lefts.sort()
+        rect_rights.sort()
+        left_boundary = rect_lefts[3] if len(rect_lefts) > 3 else rect_lefts[0] if len(rect_lefts) > 0 else 0
+        right_boundary = rect_rights[-3] if len(rect_rights) > 3 else rect_rights[-1] if len(rect_rights) > 0 else 0
 
         if len(nlines) > 3: 
             avg_gap_ratio = sum_gap_ratio / (len(nlines)-1)
@@ -513,7 +524,7 @@ def to_markdown(
                 del img_rects[i]
 
             text = " ".join([legacy2unicode(s["text"], s["font"]) for s in spans])
-
+            text = escape_markdown(text)
             # full line mono-spaced?
             if not IGNORE_CODE:
                 all_mono = all([s["flags"] & 8 for s in spans])
@@ -538,8 +549,8 @@ def to_markdown(
                 #out_string += "\n"
                 prev_bno = bno
             
-            gap_to_use = avg_gap_ratio*lrect.height*1.02 if avg_gap_ratio > 0 else lrect.height* 1.5
-            
+            gap_to_use = avg_gap_ratio*lrect.height*1.15 if avg_gap_ratio > 0 else lrect.height* 1.5
+            extra_line_added = False
             if (  # check if we need another line break
                 prev_lrect 
                 and lrect.y1 - prev_lrect.y1 > gap_to_use
@@ -547,15 +558,19 @@ def to_markdown(
                 or span0["text"].startswith(bullet)
                 or span0["flags"] & 1  # superscript?
                 or starts_with_numeric_and_bullet(span0["text"])
+                or (prev_lrect.x1 < right_boundary*0.8 and lrect.y1 - prev_lrect.y1 > gap_to_use*0.5)
+                or (lrect.x0 > left_boundary*1.2 and lrect.y1 - prev_lrect.y1 > gap_to_use*0.5)
             ):
                 out_string += "\n"
+                extra_line_added = True
+
             prev_lrect = lrect
 
             # if line is a header, this will return multiple "#" characters
             hdr_string = get_header_id(span0, page=page)
 
             # intercept if header text has been broken in multiple lines
-            if hdr_string and hdr_string == prev_hdr_string:
+            if hdr_string and hdr_string == prev_hdr_string and not extra_line_added:
                 out_string = out_string[:-1] + " " + text + "\n"
                 continue
 
@@ -575,6 +590,7 @@ def to_markdown(
                 bold = s["flags"] & 16
                 italic = s["flags"] & 2
                 correct_str = legacy2unicode(s["text"], s["font"]).strip()
+                correct_str = escape_markdown(correct_str)
                 if mono:
                     # this is text in some monospaced font
                     out_string += f"`{correct_str}`"
@@ -886,7 +902,7 @@ def to_markdown(
                 line_rects=line_rects,
             )
 
-        md_string = md_string.replace(" ,", ",").replace("-\n", "")
+        md_string = md_string.replace(" ,", ",")
         # write any remaining tables and images
         md_string += output_tables(tabs, None, tab_rects, line_rects, textpage)
         md_string += output_images(page, textpage, None, vg_clusters, line_rects)
